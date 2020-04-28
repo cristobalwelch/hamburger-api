@@ -46,6 +46,11 @@ def hamburguesa_post():
         response = {'status': 'input invalido'}
         return jsonify(response), 400
 
+@app.route("/hamburguesa/<string:id>")
+def hamburguesa_get_by_id(id):
+    hamburgers_list = list(hamburgers.find({"id": id}, {"_id": 0}))
+    print("Hamburgers: ", hamburgers_list)
+    return ''
 
 if __name__ == "__main__":
     app.run(debug=True)

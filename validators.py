@@ -22,3 +22,6 @@ def hamburger_creator(data):
         response = {'status': 'invalid input'}
         return response
     
+def hamburger_search_by_id(id):
+    return ''
+    

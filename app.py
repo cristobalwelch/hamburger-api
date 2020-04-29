@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from pymongo import MongoClient
+import os
 
 import parameters
 from validators import hamburger_creator, hamburger_search_by_id, ingredient_creator, ingredient_search_by_id, hamburger_update
@@ -7,7 +8,8 @@ from validators import hamburger_creator, hamburger_search_by_id, ingredient_cre
 app = Flask(__name__)
 
 # Connect to MongoDB
-uri = "mongodb+srv://welch_hamburger_api:"+parameters.mongo_password+"@cluster0-cy0hv.mongodb.net/test?retryWrites=true&w=majority"
+#uri = "mongodb+srv://welch_hamburger_api:"+parameters.mongo_password+"@cluster0-cy0hv.mongodb.net/test?retryWrites=true&w=majority"
+uri = os.environ.get('MONGO_URL')
 client = MongoClient(uri)
 db = client.get_database()
 

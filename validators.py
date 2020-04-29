@@ -48,3 +48,33 @@ def ingredient_creator(data):
     else:
         response = {'status': 'invalid input'}
     return response
+
+def ingredient_search_by_id(id):
+    if not id.isdigit():
+        response = {'status': 'invalid id'}
+        return response
+    response = {'status': 'valid id'}
+    return response
+
+def hamburger_update(current_data, new_data):
+
+    valid_update = True
+    keys = ['nombre', 'precio', 'descripcion', 'imagen']
+    new_data_keys = new_data.keys()
+
+    for key in keys:
+        if key not in new_data_keys:
+            valid_update = False
+    
+    if "id" in new_data_keys or "ingredientes" in new_data_keys:
+        valid_update = False
+    
+    if valid_update:
+        if not (isinstance(new_data["nombre"], str) and isinstance(new_data["precio"], int) and isinstance(new_data["descripcion"], str) and isinstance(new_data["imagen"], str)):
+            valid_update = False
+    
+    if valid_update:
+        response = {'status': 'valid update'}
+    else:
+        response = {'status': 'invalid update'}
+    return response

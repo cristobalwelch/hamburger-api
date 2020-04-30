@@ -8,8 +8,8 @@ from validators import hamburger_creator, hamburger_search_by_id, ingredient_cre
 app = Flask(__name__)
 
 # Connect to MongoDB
-#uri = "mongodb+srv://welch_hamburger_api:"+parameters.mongo_password+"@cluster0-cy0hv.mongodb.net/test?retryWrites=true&w=majority"
-uri = os.environ.get('MONGO_URL')
+uri = "mongodb+srv://welch_hamburger_api:"+parameters.mongo_password+"@cluster0-cy0hv.mongodb.net/test?retryWrites=true&w=majority"
+#uri = os.environ.get('MONGO_URL')
 client = MongoClient(uri)
 db = client.get_database()
 
@@ -110,6 +110,37 @@ def hamburguesa_patch(id):
     else:
         response = {'status': 'hamburguesa inexistente'} # Check if it should be 404 or 400
         return jsonify(response), 404
+
+# Adds ingredient on burger
+@app.route("/hamburguesa/<string:burger_id>/ingrediente/<string:ingredient_id>", methods=["PUT"])
+def hamburguesa_put_ingrediente(burger_id, ingredient_id):
+    
+    valid_burger_id = hamburger_search_by_id(burger_id)
+    valid_ingredient_id = ingredient_search_by_id(ingredient_id)
+
+    if valid_burger_id['status'] == 'invalid id':
+        response = {'status': 'id de hamburguesa invalido'}
+        return jsonify(response), 400
+    else:
+        if valid_ingredient_id['status'] == 'invalid id':
+            response = {'status': 'ingrediente inexistente'}
+            return jsonify(response), 404
+        else:
+            hamburgers_list = list(
+                hamburgers.find({"id": int(burger_id)}, {"_id": 0}))
+            if len(hamburgers_list) == 0:
+                response = {'status': 'id de hamburguesa invalido'}
+                return jsonify(response), 400
+            else:
+                ingredients_list = list(ingredients.find({"id": int(ingredient_id)}, {"_id": 0}))
+                if len(ingredients_list) == 0:
+                    response = {'status': 'ingrediente inexistente'}
+                    return jsonify(response), 404
+                else:
+                    data = {"hamburguesa_id": hamburgers_list[0]["id"], "ingrediente_id": ingredients_list[0]["id"]}
+                    hamburgers_ingredients.insert_one(data)
+                    response = {'status': 'ingrediente agregado'}
+                    return jsonify(response), 201
 
 @app.route("/ingrediente", methods=["GET"])
 def ingredient_get():

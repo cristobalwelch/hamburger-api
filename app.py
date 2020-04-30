@@ -8,8 +8,8 @@ from validators import hamburger_creator, hamburger_search_by_id, ingredient_cre
 app = Flask(__name__)
 
 # Connect to MongoDB
-#uri = "mongodb+srv://welch_hamburger_api:"+parameters.mongo_password+"@cluster0-cy0hv.mongodb.net/test?retryWrites=true&w=majority"
-uri = os.environ.get('MONGO_URL')
+uri = "mongodb+srv://welch_hamburger_api:"+parameters.mongo_password+"@cluster0-cy0hv.mongodb.net/test?retryWrites=true&w=majority"
+#uri = os.environ.get('MONGO_URL')
 client = MongoClient(uri)
 db = client.get_database()
 
@@ -32,15 +32,13 @@ def hamburguesa_get():
     for burger in all_hamburgers:
         burger_ingredients_paths = list()
         burger_ingredients_list = list(hamburgers_ingredients.find({"hamburguesa_id": burger["id"]}, {"_id": 0}))
-        print("\n", burger_ingredients_list)
 
         for ingredient in burger_ingredients_list:
-            p = {"path": "https://link.com/ingrediente/"+str(ingredient["id"])}
+            print(ingredient)
+            p = {"path": "https://link.com/ingrediente/"+str(ingredient["ingrediente_id"])}
             burger_ingredients_paths.append(p)
-        burger_ingredients_list[0]["ingredientes"] = burger_ingredients_paths
-        response_list.append(burger_ingredients_list[0])
-
-    #print(f"Burgers: {all_hamburgers}")
+        burger["ingredientes"] = burger_ingredients_paths
+        response_list.append(burger)
     return jsonify(response_list), 200
 
 # Creates new burger
@@ -190,7 +188,7 @@ def hamburguesa_put_ingrediente(burger_id, ingredient_id):
                     
                     hamburgers_ingredients_list = list(hamburgers_ingredients.find(
                         {"hamburguesa_id": hamburgers_list[0]["id"], "ingrediente_id": ingredients_list[0]["id"]}))
-                    if len(hamburgers_ingredients_list) != 0:
+                    if len(hamburgers_ingredients_list) == 0:
                         hamburgers_ingredients.insert_one(data)
                     response = {'status': 'ingrediente agregado'}
                     return jsonify(response), 201

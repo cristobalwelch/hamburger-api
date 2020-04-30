@@ -25,9 +25,23 @@ def hello_world():
 # Returns all Burgers
 @app.route("/hamburguesa", methods=["GET"])
 def hamburguesa_get():
+
+    response_list = list()
     all_hamburgers = list(hamburgers.find({}, {"_id": 0}))
-    print(f"Burgers: {all_hamburgers}")
-    return jsonify(all_hamburgers), 200
+
+    for burger in all_hamburgers:
+        burger_ingredients_paths = list()
+        burger_ingredients_list = list(hamburgers_ingredients.find({"hamburguesa_id": burger["id"]}, {"_id": 0}))
+        print("\n", burger_ingredients_list)
+
+        for ingredient in burger_ingredients_list:
+            p = {"path": "https://link.com/ingrediente/"+str(ingredient["id"])}
+            burger_ingredients_paths.append(p)
+        burger_ingredients_list[0]["ingredientes"] = burger_ingredients_paths
+        response_list.append(burger_ingredients_list[0])
+
+    #print(f"Burgers: {all_hamburgers}")
+    return jsonify(response_list), 200
 
 # Creates new burger
 @app.route("/hamburguesa", methods=["POST"]) # Missing case where fields are empty 
@@ -62,6 +76,12 @@ def hamburguesa_get_by_id(id):
             return jsonify(response), 404
         else:
             response = hamburgers_list[0]
+            burger_ingredients = list(hamburgers_ingredients.find({"hamburguesa_id": int(id)}))
+            ingredient_list = list()
+            for ingredient in burger_ingredients:
+                p = {"path": "https://link.com/ingredientes/"+ingredient['id']}
+                ingredient_list.append(p)
+            response['ingredientes'] = ingredient_list
             return jsonify(response), 200
 
 # Deletes burger with id: id
@@ -111,6 +131,35 @@ def hamburguesa_patch(id):
         response = {'status': 'hamburguesa inexistente'} # Check if it should be 404 or 400
         return jsonify(response), 404
 
+# Removes ingredient from burger
+@app.route("/hamburguesa/<string:burger_id>/ingrediente/<string:ingredient_id>", methods=["DELETE"])
+def remove_ingrediente_hamburguesa(burger_id, ingredient_id):
+    
+    valid_burger_id = hamburger_search_by_id(burger_id)
+    valid_ingredient_id = ingredient_search_by_id(ingredient_id)
+
+    if valid_burger_id['status'] == 'invalid id':
+        response = {'status': 'id de hamburguesa invalido'}
+        return jsonify(response), 400
+    else:
+        if valid_ingredient_id['status'] == 'invalid id':
+            response = {'status': 'id de ingrediente invalido'}
+            return jsonify(response), 400
+        else:
+            hamburgers_list = list(hamburgers.find({"id": int(burger_id)}, {"_id": 0}))
+            if len(hamburgers_list) == 0:
+                response = {'status': 'hamburguesa inexistente'}
+                return jsonify(response), 404
+            else:
+                hamburgers_ingredients_list = list(hamburgers_ingredients.find({"hamburguesa_id": int(burger_id), "ingrediente_id": int(ingredient_id)}, {"_id": 0}))
+                if len(hamburgers_ingredients_list) == 0:
+                    response = {'status': 'ingrediente inexistente en la hamburguesa'}
+                    return jsonify(response), 404
+                else:
+                    hamburgers_ingredients.delete_many({"hamburguesa_id": int(burger_id), "ingrediente_id": int(ingredient_id)})
+                    response = {'status': 'ingrediente retirado'}
+                    return jsonify(response), 200
+
 # Adds ingredient on burger
 @app.route("/hamburguesa/<string:burger_id>/ingrediente/<string:ingredient_id>", methods=["PUT"])
 def hamburguesa_put_ingrediente(burger_id, ingredient_id):
@@ -138,7 +187,11 @@ def hamburguesa_put_ingrediente(burger_id, ingredient_id):
                     return jsonify(response), 404
                 else:
                     data = {"hamburguesa_id": hamburgers_list[0]["id"], "ingrediente_id": ingredients_list[0]["id"]}
-                    hamburgers_ingredients.insert_one(data)
+                    
+                    hamburgers_ingredients_list = list(hamburgers_ingredients.find(
+                        {"hamburguesa_id": hamburgers_list[0]["id"], "ingrediente_id": ingredients_list[0]["id"]}))
+                    if len(hamburgers_ingredients_list) != 0:
+                        hamburgers_ingredients.insert_one(data)
                     response = {'status': 'ingrediente agregado'}
                     return jsonify(response), 201
 
@@ -191,10 +244,14 @@ def ingredient_delete(id): # Missing condition if being used in some burger
             return jsonify(response), 404
         else:
             # Check if ingredient is currently being used
-            # if blah blah
-            ingredients.delete_many({"id": int(id)})
-            response = {'status': 'ingrediente eliminado'}
-            return jsonify(response), 200
+            hamburgers_ingredients_list = list(hamburgers_ingredients.find({"ingrediente_id": int(id)}))
+            if len(hamburgers_ingredients_list) == 0:
+                ingredients.delete_many({"id": int(id)})
+                response = {'status': 'ingrediente eliminado'}
+                return jsonify(response), 200
+            else:
+                response = {'status': 'ingrediente no se puede borrar, se encuentra presente en una hamburguesa'}
+                return jsonify(response), 409
     else:
         response = {'status': 'ingrediente inexistente'}
         return jsonify(response), 404

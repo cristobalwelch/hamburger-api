@@ -11,8 +11,11 @@ def hamburger_creator(data):
     else:
         if not (isinstance(data['nombre'], str) and 
             isinstance(data['precio'], int) and isinstance(data['descripcion'], str) and isinstance(data['imagen'], str)):
+                valid_burger=False
+        else:
+            if not (len(data['nombre'] > 0) and len(data['descripcion'] > 0) and len(data['imagen'] > 0)):
             # Valid Burger
-            valid_burger = False
+                valid_burger = False
     
     if valid_burger:
         # Valid

@@ -8,8 +8,8 @@ from validators import hamburger_creator, hamburger_search_by_id, ingredient_cre
 app = Flask(__name__)
 
 # Connect to MongoDB
-uri = "mongodb+srv://welch_hamburger_api:"+parameters.mongo_password+"@cluster0-cy0hv.mongodb.net/test?retryWrites=true&w=majority"
-#uri = os.environ.get('MONGO_URL')
+#uri = "mongodb+srv://welch_hamburger_api:"+parameters.mongo_password+"@cluster0-cy0hv.mongodb.net/test?retryWrites=true&w=majority"
+uri = os.environ.get('MONGO_URL')
 client = MongoClient(uri)
 db = client.get_database()
 

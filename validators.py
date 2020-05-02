@@ -1,3 +1,5 @@
+import collections
+
 def hamburger_creator(data):
 
     valid_burger = True
@@ -37,16 +39,19 @@ def hamburger_search_by_id(id):
 def ingredient_creator(data):
 
     valid_ingredient = True
-    keys = ['id', 'nombre', 'descripcion']
+    keys = ['nombre', 'descripcion']
     data_keys = data.keys()
 
-    for key in keys:
-        if key not in data_keys:
-            valid_ingredient = False
+    if not collections.Counter(keys) == collections.Counter(data_keys):
+        valid_ingredient = False
     
     if valid_ingredient:
-        if not (isinstance(data['id'], int) and isinstance(data['nombre'], str) and isinstance(data['descripcion'], str)):
-            valid_ingredient = False
+        for key in data_keys:
+            if not isinstance(data[key], str):
+                valid_ingredient = False
+            else:
+                if not any(c.isalpha() for c in data[key]):
+                    valid_ingredient = False
     
     if valid_ingredient:
         response = {'status': 'valid input'}

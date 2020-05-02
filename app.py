@@ -172,14 +172,14 @@ def hamburguesa_put_ingrediente(burger_id, ingredient_id):
         return jsonify(response), 400
     else:
         if valid_ingredient_id['status'] == 'invalid id':
-            response = {'status': 'ingrediente inexistente'}
-            return jsonify(response), 404
+            response = {'status': 'id de ingrediente invalido'}
+            return jsonify(response), 400
         else:
             hamburgers_list = list(
                 hamburgers.find({"id": int(burger_id)}, {"_id": 0}))
             if len(hamburgers_list) == 0:
-                response = {'status': 'id de hamburguesa invalido'}
-                return jsonify(response), 400
+                response = {'status': 'hamburguesa inexistente'}
+                return jsonify(response), 404
             else:
                 ingredients_list = list(ingredients.find({"id": int(ingredient_id)}, {"_id": 0}))
                 if len(ingredients_list) == 0:
@@ -224,6 +224,8 @@ def ingredient_post():
     valid = ingredient_creator(data)
 
     if valid['status'] == 'valid input':
+        data["id"] = parameters.current_ingredient_id
+        parameters.current_ingredient_id += 1
         inserted_ingredient = ingredients.insert_one(data)
         print("Inserted Ingredient: ", inserted_ingredient)
         response = {"status": "ingrediente creado"}
@@ -233,7 +235,7 @@ def ingredient_post():
         return jsonify(response), 400
 
 @app.route("/ingrediente/<string:id>", methods=["DELETE"])
-def ingredient_delete(id): # Missing condition if being used in some burger
+def ingredient_delete(id):
     
     valid = ingredient_search_by_id(id)
 
@@ -253,8 +255,8 @@ def ingredient_delete(id): # Missing condition if being used in some burger
                 response = {'status': 'ingrediente no se puede borrar, se encuentra presente en una hamburguesa'}
                 return jsonify(response), 409
     else:
-        response = {'status': 'ingrediente inexistente'}
-        return jsonify(response), 404
+        response = {'status': 'input invalido'}
+        return jsonify(response), 400
 
 if __name__ == "__main__":
     app.run(debug=True)

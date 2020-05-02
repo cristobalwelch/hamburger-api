@@ -17,6 +17,14 @@ db = client.get_database()
 hamburgers = db.hamburgers
 ingredients = db.ingredients
 hamburgers_ingredients = db.hamburgers_ingredients
+counters = db.counters
+
+# Initialize counters
+burger_counter = {'burger_counter': 0}
+ingredient_counter = {'ingredient_counter': 0}
+
+counters.insert_one(burger_counter)
+counters.insert_one(ingredient_counter)
 
 @app.route("/")
 def hello_world():
@@ -42,23 +50,34 @@ def hamburguesa_get():
     return jsonify(response_list), 200
 
 # Creates new burger
-@app.route("/hamburguesa", methods=["POST"]) # Missing case where fields are empty 
+@app.route("/hamburguesa", methods=["POST"])
 def hamburguesa_post():
 
     data = request.get_json()
     valid = hamburger_creator(data)
 
     if valid['status'] == 'valid input':
+        #new_id = counters.find({"burger_counter"}, {"_id": 0})
         data['id'] = parameters.current_burger_id
         parameters.current_burger_id += 1
         inserted_burger = hamburgers.insert_one(data)
         #response = {'status': 'hamburguesa creada'}
-        response = hamburguesa_get_by_id(data['id']) # EDITED
+        #response = hamburguesa_get_by_id(str(data['id'])) # EDITED
+        hamburgers_list = list(hamburgers.find({"id": int(id)}, {"_id": 0}))
+        response = hamburgers_list[0]
+        burger_ingredients = list(hamburgers_ingredients.find({"hamburguesa_id": int(id)}))
+        ingredient_list = list()
+        for ingredient in burger_ingredients:
+            print("Ingredient: ", ingredient, "\n")
+            p = {"path": "https://link.com/ingredientes/" +
+                    str(ingredient['ingrediente_id'])}
+            ingredient_list.append(p)
+        response['ingredientes'] = ingredient_list
         return jsonify(response), 201
     
     else:
-        response = {'status': 'input invalido'}
-        return jsonify(response), 400
+        #response = {'status': 'input invalido'}
+        return jsonify(), 400
 
 # Searches burger with id: id
 @app.route("/hamburguesa/<string:id>")
@@ -123,12 +142,23 @@ def hamburguesa_patch(id):
                 print("MADE IT HERE/n")
                 hamburgers.update_one(current_burger[0], new_values)
                 #response = {'status': 'operacion exitosa'}
-                response = hamburguesa_get_by_id(id)
+                #response = hamburguesa_get_by_id(id)
+                hamburgers_list = list(
+                    hamburgers.find({"id": int(id)}, {"_id": 0}))
+                response = hamburgers_list[0]
+                burger_ingredients = list(
+                    hamburgers_ingredients.find({"hamburguesa_id": int(id)}))
+                ingredient_list = list()
+                for ingredient in burger_ingredients:
+                    print("Ingredient: ", ingredient, "\n")
+                    p = {"path": "https://link.com/ingredientes/" +
+                        str(ingredient['ingrediente_id'])}
+                    ingredient_list.append(p)
+                response['ingredientes'] = ingredient_list
                 return jsonify(response), 200
             else:
                 #response = {'status': 'parametros invalidos'}
                 return jsonify(), 400
-            pass
     else:
         #response = {'status': 'parametros invalidos'}
         return jsonify(), 400
@@ -231,7 +261,9 @@ def ingredient_post():
         inserted_ingredient = ingredients.insert_one(data)
         print("Inserted Ingredient: ", inserted_ingredient)
         #response = {"status": "ingrediente creado"}
-        response = ingrediente_get_by_id(data["id"])
+        #response = ingrediente_get_by_id(str(data["id"]))
+        ingredients_list = list(ingredients.find({"id": data["id"]}, {"_id": 0}))
+        response = ingredients_list[0]
         return jsonify(response), 201
     else:
         #response = {"status": "Input invalido"}

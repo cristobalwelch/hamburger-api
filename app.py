@@ -77,7 +77,8 @@ def hamburguesa_get_by_id(id):
             burger_ingredients = list(hamburgers_ingredients.find({"hamburguesa_id": int(id)}))
             ingredient_list = list()
             for ingredient in burger_ingredients:
-                p = {"path": "https://link.com/ingredientes/"+ingredient['id']}
+                print("Ingredient: ", ingredient, "\n")
+                p = {"path": "https://link.com/ingredientes/"+str(ingredient['ingrediente_id'])}
                 ingredient_list.append(p)
             response['ingredientes'] = ingredient_list
             return jsonify(response), 200
@@ -94,12 +95,13 @@ def hamburguesa_delete(id):
             response = {'status': 'hamburguesa inexistente'}
             return jsonify(response), 404
         else:
+            hamburgers_ingredients.delete_many({"hamburguesa_id": int(id)})
             hamburgers.delete_many({"id": int(id)})
             response = {'status': 'hamburguesa eliminada'}
             return jsonify(response), 200
     else:
-        response = {'status': 'hamburguesa inexistente'}
-        return jsonify(response), 404
+        response = {'status': 'input invalido'}
+        return jsonify(response), 400
 
 # Updates burger information
 @app.route("/hamburguesa/<string:id>", methods=["PATCH"])
@@ -110,7 +112,7 @@ def hamburguesa_patch(id):
 
     if valid_id['status'] == 'valid id':
         current_burger = list(hamburgers.find({"id": int(id)}, {"_id": 0}))
-        if len(current_burger) == 0: # Check if it should be 404 or 400
+        if len(current_burger) == 0:
             response = {'status': 'hamburguesa inexistente'}
             return jsonify(response), 404
         else:
@@ -126,8 +128,8 @@ def hamburguesa_patch(id):
                 return jsonify(response), 400
             pass
     else:
-        response = {'status': 'hamburguesa inexistente'} # Check if it should be 404 or 400
-        return jsonify(response), 404
+        response = {'status': 'parametros invalidos'}
+        return jsonify(response), 400
 
 # Removes ingredient from burger
 @app.route("/hamburguesa/<string:burger_id>/ingrediente/<string:ingredient_id>", methods=["DELETE"])

@@ -23,8 +23,15 @@ counters = db.counters
 burger_counter = {'burger_counter': 0}
 ingredient_counter = {'ingredient_counter': 0}
 
-counters.insert_one(burger_counter)
-counters.insert_one(ingredient_counter)
+#burger_counter_init_list = list(counters.find)
+burger_init = list(counters.find({"burger_counter": {"$exists": "true", "$ne": "false"}}))
+ingredients_init = list(counters.find({"ingredient_counter": {"$exists": "true", "$ne": "false"}}))
+
+print("Burger Init: ", burger_init)
+if not burger_init:
+    counters.insert_one(burger_counter)
+if not ingredients_init:
+    counters.insert_one(ingredient_counter)
 
 @app.route("/")
 def hello_world():
@@ -57,15 +64,19 @@ def hamburguesa_post():
     valid = hamburger_creator(data)
 
     if valid['status'] == 'valid input':
-        #new_id = counters.find({"burger_counter"}, {"_id": 0})
-        data['id'] = parameters.current_burger_id
-        parameters.current_burger_id += 1
+        #new_id = list(counters.find({"burger_counter"}, {"_id": 0}))
+        #print("New ID: ", new_id)
+        ids_list = list(counters.find({}, {"_id": 0}))
+        ids = dict()
+        for counter in ids_list:
+            ids.update(counter)
+        data["id"] = ids["burger_counter"]
+        new_id = {"$set": {"burger_counter": data["id"] + 1}}
+        counters.update_one({"burger_counter": data["id"]}, new_id)
         inserted_burger = hamburgers.insert_one(data)
-        #response = {'status': 'hamburguesa creada'}
-        #response = hamburguesa_get_by_id(str(data['id'])) # EDITED
-        hamburgers_list = list(hamburgers.find({"id": int(id)}, {"_id": 0}))
+        hamburgers_list = list(hamburgers.find({"id": data['id']}, {"_id": 0}))
         response = hamburgers_list[0]
-        burger_ingredients = list(hamburgers_ingredients.find({"hamburguesa_id": int(id)}))
+        burger_ingredients = list(hamburgers_ingredients.find({"hamburguesa_id": data['id']}))
         ingredient_list = list()
         for ingredient in burger_ingredients:
             print("Ingredient: ", ingredient, "\n")
@@ -83,6 +94,11 @@ def hamburguesa_post():
 @app.route("/hamburguesa/<string:id>")
 def hamburguesa_get_by_id(id):
 
+    ids_list = list(counters.find({}, {"_id": 0}))
+    ids = dict()
+    for counter in ids_list:
+        ids.update(counter) 
+    
     valid = hamburger_search_by_id(id)
     if valid['status'] == 'invalid id':
         #response = {'status': 'id invalido'}
@@ -256,8 +272,16 @@ def ingredient_post():
     valid = ingredient_creator(data)
 
     if valid['status'] == 'valid input':
-        data["id"] = parameters.current_ingredient_id
-        parameters.current_ingredient_id += 1
+        ids_list = list(counters.find({}, {"_id": 0}))
+        ids = dict()
+        for counter in ids_list:
+            ids.update(counter)
+        data["id"] = ids["ingredient_counter"]
+        new_id = {"$set": {"ingredient_counter": data["id"] + 1}}
+        counters.update_one({"ingredient_counter": data["id"]}, new_id)
+
+        #data["id"] = parameters.current_ingredient_id
+        #parameters.current_ingredient_id += 1
         inserted_ingredient = ingredients.insert_one(data)
         print("Inserted Ingredient: ", inserted_ingredient)
         #response = {"status": "ingrediente creado"}

@@ -52,7 +52,8 @@ def hamburguesa_post():
         data['id'] = parameters.current_burger_id
         parameters.current_burger_id += 1
         inserted_burger = hamburgers.insert_one(data)
-        response = {'status': 'hamburguesa creada'}
+        #response = {'status': 'hamburguesa creada'}
+        response = hamburguesa_get_by_id(data['id']) # EDITED
         return jsonify(response), 201
     
     else:
@@ -65,13 +66,13 @@ def hamburguesa_get_by_id(id):
 
     valid = hamburger_search_by_id(id)
     if valid['status'] == 'invalid id':
-        response = {'status': 'id invalido'}
-        return jsonify(response), 400
+        #response = {'status': 'id invalido'}
+        return jsonify(), 400
     else:
         hamburgers_list = list(hamburgers.find({"id": int(id)}, {"_id": 0}))
         if len(hamburgers_list) == 0:
-            response = {'status': 'hamburguesa inexistente'}
-            return jsonify(response), 404
+            #response = {'status': 'hamburguesa inexistente'}
+            return jsonify(), 404
         else:
             response = hamburgers_list[0]
             burger_ingredients = list(hamburgers_ingredients.find({"hamburguesa_id": int(id)}))
@@ -92,16 +93,16 @@ def hamburguesa_delete(id):
     if valid['status'] == 'valid id':
         hamburgers_list = list(hamburgers.find({"id": int(id)}))
         if len(hamburgers_list) == 0:
-            response = {'status': 'hamburguesa inexistente'}
-            return jsonify(response), 404
+            #response = {'status': 'hamburguesa inexistente'}
+            return jsonify(), 404
         else:
             hamburgers_ingredients.delete_many({"hamburguesa_id": int(id)})
             hamburgers.delete_many({"id": int(id)})
-            response = {'status': 'hamburguesa eliminada'}
-            return jsonify(response), 200
+            #response = {'status': 'hamburguesa eliminada'}
+            return jsonify(), 200
     else:
-        response = {'status': 'input invalido'}
-        return jsonify(response), 400
+        #response = {'status': 'input invalido'}
+        return jsonify(), 400
 
 # Updates burger information
 @app.route("/hamburguesa/<string:id>", methods=["PATCH"])
@@ -113,23 +114,24 @@ def hamburguesa_patch(id):
     if valid_id['status'] == 'valid id':
         current_burger = list(hamburgers.find({"id": int(id)}, {"_id": 0}))
         if len(current_burger) == 0:
-            response = {'status': 'hamburguesa inexistente'}
-            return jsonify(response), 404
+            #response = {'status': 'hamburguesa inexistente'}
+            return jsonify(), 404
         else:
             valid_update = hamburger_update(current_burger, data)
             if valid_update['status'] == 'valid update':
                 new_values = {"$set": data}
                 print("MADE IT HERE/n")
                 hamburgers.update_one(current_burger[0], new_values)
-                response = {'status': 'operacion exitosa'}
+                #response = {'status': 'operacion exitosa'}
+                response = hamburguesa_get_by_id(id)
                 return jsonify(response), 200
             else:
-                response = {'status': 'parametros invalidos'}
-                return jsonify(response), 400
+                #response = {'status': 'parametros invalidos'}
+                return jsonify(), 400
             pass
     else:
-        response = {'status': 'parametros invalidos'}
-        return jsonify(response), 400
+        #response = {'status': 'parametros invalidos'}
+        return jsonify(), 400
 
 # Removes ingredient from burger
 @app.route("/hamburguesa/<string:burger_id>/ingrediente/<string:ingredient_id>", methods=["DELETE"])
@@ -139,26 +141,26 @@ def remove_ingrediente_hamburguesa(burger_id, ingredient_id):
     valid_ingredient_id = ingredient_search_by_id(ingredient_id)
 
     if valid_burger_id['status'] == 'invalid id':
-        response = {'status': 'id de hamburguesa invalido'}
-        return jsonify(response), 400
+        #response = {'status': 'id de hamburguesa invalido'}
+        return jsonify(), 400
     else:
         if valid_ingredient_id['status'] == 'invalid id':
-            response = {'status': 'id de ingrediente invalido'}
-            return jsonify(response), 400
+            #response = {'status': 'id de ingrediente invalido'}
+            return jsonify(), 400
         else:
             hamburgers_list = list(hamburgers.find({"id": int(burger_id)}, {"_id": 0}))
             if len(hamburgers_list) == 0:
-                response = {'status': 'hamburguesa inexistente'}
-                return jsonify(response), 404
+                #response = {'status': 'hamburguesa inexistente'}
+                return jsonify(), 404
             else:
                 hamburgers_ingredients_list = list(hamburgers_ingredients.find({"hamburguesa_id": int(burger_id), "ingrediente_id": int(ingredient_id)}, {"_id": 0}))
                 if len(hamburgers_ingredients_list) == 0:
-                    response = {'status': 'ingrediente inexistente en la hamburguesa'}
-                    return jsonify(response), 404
+                    #response = {'status': 'ingrediente inexistente en la hamburguesa'}
+                    return jsonify(), 404
                 else:
                     hamburgers_ingredients.delete_many({"hamburguesa_id": int(burger_id), "ingrediente_id": int(ingredient_id)})
-                    response = {'status': 'ingrediente retirado'}
-                    return jsonify(response), 200
+                    #response = {'status': 'ingrediente retirado'}
+                    return jsonify(), 200
 
 # Adds ingredient on burger
 @app.route("/hamburguesa/<string:burger_id>/ingrediente/<string:ingredient_id>", methods=["PUT"])
@@ -168,23 +170,23 @@ def hamburguesa_put_ingrediente(burger_id, ingredient_id):
     valid_ingredient_id = ingredient_search_by_id(ingredient_id)
 
     if valid_burger_id['status'] == 'invalid id':
-        response = {'status': 'id de hamburguesa invalido'}
-        return jsonify(response), 400
+        #response = {'status': 'id de hamburguesa invalido'}
+        return jsonify(), 400
     else:
         if valid_ingredient_id['status'] == 'invalid id':
-            response = {'status': 'id de ingrediente invalido'}
-            return jsonify(response), 400
+            #response = {'status': 'id de ingrediente invalido'}
+            return jsonify(), 400
         else:
             hamburgers_list = list(
                 hamburgers.find({"id": int(burger_id)}, {"_id": 0}))
             if len(hamburgers_list) == 0:
-                response = {'status': 'hamburguesa inexistente'}
-                return jsonify(response), 404
+                #response = {'status': 'hamburguesa inexistente'}
+                return jsonify(), 404
             else:
                 ingredients_list = list(ingredients.find({"id": int(ingredient_id)}, {"_id": 0}))
                 if len(ingredients_list) == 0:
-                    response = {'status': 'ingrediente inexistente'}
-                    return jsonify(response), 404
+                    #response = {'status': 'ingrediente inexistente'}
+                    return jsonify(), 404
                 else:
                     data = {"hamburguesa_id": hamburgers_list[0]["id"], "ingrediente_id": ingredients_list[0]["id"]}
                     
@@ -192,8 +194,8 @@ def hamburguesa_put_ingrediente(burger_id, ingredient_id):
                         {"hamburguesa_id": hamburgers_list[0]["id"], "ingrediente_id": ingredients_list[0]["id"]}))
                     if len(hamburgers_ingredients_list) == 0:
                         hamburgers_ingredients.insert_one(data)
-                    response = {'status': 'ingrediente agregado'}
-                    return jsonify(response), 201
+                    #response = {'status': 'ingrediente agregado'}
+                    return jsonify(), 201
 
 @app.route("/ingrediente", methods=["GET"])
 def ingredient_get():
@@ -205,13 +207,13 @@ def ingrediente_get_by_id(id):
 
     valid = ingredient_search_by_id(id)
     if valid['status'] == 'invalid id':
-        response = {'status': 'id invalido'}
-        return jsonify(response), 400
+        #response = {'status': 'id invalido'}
+        return jsonify(), 400
     else:
         ingredients_list = list(ingredients.find({"id": int(id)}, {"_id": 0}))
         if len(ingredients_list) == 0:
-            response = {'status': 'ingrediente inexistente'}
-            return jsonify(response), 404
+            #response = {'status': 'ingrediente inexistente'}
+            return jsonify(), 404
         else:
             response = ingredients_list[0]
             return jsonify(response), 200
@@ -228,11 +230,12 @@ def ingredient_post():
         parameters.current_ingredient_id += 1
         inserted_ingredient = ingredients.insert_one(data)
         print("Inserted Ingredient: ", inserted_ingredient)
-        response = {"status": "ingrediente creado"}
+        #response = {"status": "ingrediente creado"}
+        response = ingrediente_get_by_id(data["id"])
         return jsonify(response), 201
     else:
-        response = {"status": "Input invalido"}
-        return jsonify(response), 400
+        #response = {"status": "Input invalido"}
+        return jsonify(), 400
 
 @app.route("/ingrediente/<string:id>", methods=["DELETE"])
 def ingredient_delete(id):
@@ -242,21 +245,21 @@ def ingredient_delete(id):
     if valid['status'] == 'valid id':
         ingredient_list = list(ingredients.find({"id": int(id)}))
         if len(ingredient_list) == 0:
-            response = {'status': 'ingrediente inexistente'}
-            return jsonify(response), 404
+            #response = {'status': 'ingrediente inexistente'}
+            return jsonify(), 404
         else:
             # Check if ingredient is currently being used
             hamburgers_ingredients_list = list(hamburgers_ingredients.find({"ingrediente_id": int(id)}))
             if len(hamburgers_ingredients_list) == 0:
                 ingredients.delete_many({"id": int(id)})
-                response = {'status': 'ingrediente eliminado'}
-                return jsonify(response), 200
+                #response = {'status': 'ingrediente eliminado'}
+                return jsonify(), 200
             else:
-                response = {'status': 'ingrediente no se puede borrar, se encuentra presente en una hamburguesa'}
-                return jsonify(response), 409
+                #response = {'status': 'ingrediente no se puede borrar, se encuentra presente en una hamburguesa'}
+                return jsonify(), 409
     else:
-        response = {'status': 'input invalido'}
-        return jsonify(response), 400
+        #response = {'status': 'input invalido'}
+        return jsonify(), 400
 
 if __name__ == "__main__":
     app.run(debug=True)

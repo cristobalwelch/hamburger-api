@@ -50,11 +50,13 @@ def hamburguesa_get():
 
         for ingredient in burger_ingredients_list:
             print(ingredient)
-            p = {"path": "https://link.com/ingrediente/"+str(ingredient["ingrediente_id"])}
+            p = {"path": "https://frozen-retreat-73308.herokuapp.com/ingrediente/" +
+                 str(ingredient["ingrediente_id"])}
             burger_ingredients_paths.append(p)
         burger["ingredientes"] = burger_ingredients_paths
         response_list.append(burger)
     return jsonify(response_list), 200
+    # https://frozen-retreat-73308.herokuapp.com
 
 # Creates new burger
 @app.route("/hamburguesa", methods=["POST"])
@@ -80,7 +82,7 @@ def hamburguesa_post():
         ingredient_list = list()
         for ingredient in burger_ingredients:
             print("Ingredient: ", ingredient, "\n")
-            p = {"path": "https://link.com/ingredientes/" +
+            p = {"path": "https://frozen-retreat-73308.herokuapp.com/ingredientes/" +
                     str(ingredient['ingrediente_id'])}
             ingredient_list.append(p)
         response['ingredientes'] = ingredient_list
@@ -114,7 +116,8 @@ def hamburguesa_get_by_id(id):
             ingredient_list = list()
             for ingredient in burger_ingredients:
                 print("Ingredient: ", ingredient, "\n")
-                p = {"path": "https://link.com/ingredientes/"+str(ingredient['ingrediente_id'])}
+                p = {"path": "https://frozen-retreat-73308.herokuapp.com/ingredientes/" +
+                     str(ingredient['ingrediente_id'])}
                 ingredient_list.append(p)
             response['ingredientes'] = ingredient_list
             return jsonify(response), 200
@@ -167,7 +170,7 @@ def hamburguesa_patch(id):
                 ingredient_list = list()
                 for ingredient in burger_ingredients:
                     print("Ingredient: ", ingredient, "\n")
-                    p = {"path": "https://link.com/ingredientes/" +
+                    p = {"path": "https://frozen-retreat-73308.herokuapp.com/ingredientes/" +
                         str(ingredient['ingrediente_id'])}
                     ingredient_list.append(p)
                 response['ingredientes'] = ingredient_list

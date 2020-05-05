@@ -82,7 +82,7 @@ def hamburguesa_post():
         ingredient_list = list()
         for ingredient in burger_ingredients:
             print("Ingredient: ", ingredient, "\n")
-            p = {"path": "https://frozen-retreat-73308.herokuapp.com/ingredientes/" +
+            p = {"path": "https://frozen-retreat-73308.herokuapp.com/ingrediente/" +
                     str(ingredient['ingrediente_id'])}
             ingredient_list.append(p)
         response['ingredientes'] = ingredient_list
@@ -116,7 +116,7 @@ def hamburguesa_get_by_id(id):
             ingredient_list = list()
             for ingredient in burger_ingredients:
                 print("Ingredient: ", ingredient, "\n")
-                p = {"path": "https://frozen-retreat-73308.herokuapp.com/ingredientes/" +
+                p = {"path": "https://frozen-retreat-73308.herokuapp.com/ingrediente/" +
                      str(ingredient['ingrediente_id'])}
                 ingredient_list.append(p)
             response['ingredientes'] = ingredient_list
@@ -170,7 +170,7 @@ def hamburguesa_patch(id):
                 ingredient_list = list()
                 for ingredient in burger_ingredients:
                     print("Ingredient: ", ingredient, "\n")
-                    p = {"path": "https://frozen-retreat-73308.herokuapp.com/ingredientes/" +
+                    p = {"path": "https://frozen-retreat-73308.herokuapp.com/ingrediente/" +
                         str(ingredient['ingrediente_id'])}
                     ingredient_list.append(p)
                 response['ingredientes'] = ingredient_list
